@@ -186,12 +186,17 @@ class EmailSender:
         """
         
         for i, (paper, summary) in enumerate(zip(papers, summaries), 1):
+            # 获取关键词列表并用逗号拼接
+            keywords_str = ', '.join(paper.get('matched_keywords', ['未知']))
+            
             html += f"""
             <div class="paper">
                 <div class="title">📄 论文 #{i}: {paper['title']}</div>
                 <div class="meta">
                     👥 作者: {', '.join(paper['authors'][:3])}{'等' if len(paper['authors']) > 3 else ''}<br>
-                    📅 发布时间: {paper['published']} | 📚 分类: {paper['primary_category']}
+                    📅 发布时间: {paper['published']} | 📚 分类: {paper['primary_category']}<br>
+                    <!-- 新增关键词高亮显示 -->
+                    🏷️ <strong>命中关键词:</strong> <span style="color: #e74c3c; font-weight: bold;">{keywords_str}</span>
                 </div>
                 <div class="abstract">
                     <strong>摘要:</strong><br>
