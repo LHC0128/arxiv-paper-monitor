@@ -48,14 +48,30 @@ class ArxivFetcher:
                     'authors': [author.name for author in result.authors],
                     'abstract': result.summary,
                     'pdf_url': result.pdf_url,
-                    # 将 datetime 对象转换为易读的字符串格式
                     'published': result.published.strftime('%Y-%m-%d %H:%M'),
                     'primary_category': result.primary_category,
                     'categories': result.categories,
                     'arxiv_url': result.entry_id,
                 }
+                
+                # === 新增逻辑：提取命中的关键词 ===
+                matched_kws = []
+                # 将标题和摘要合并，转为小写进行无大小写敏感匹配
+                search_text = (paper['title'] + " " + paper['abstract']).lower()
+                for kw in self.keywords:
+                    # 将关键词也转为小写进行匹配
+                    if kw.strip().lower() in search_text:
+                        matched_kws.append(kw.strip())
+                
+                # 如果因为API分词原因没有精确匹配到原词，给个默认提示
+                if not matched_kws:
+                    matched_kws = ["模糊匹配"]
+                    
+                paper['matched_keywords'] = matched_kws
+                # =================================
+                
                 papers.append(paper)
-                logger.info(f"找到论文: {paper['title'][:50]}...")
+                logger.info(f"找到论文: {paper['title'][:50]}... [关键词: {', '.join(matched_kws)}]")
             
             logger.info(f"共找到 {len(papers)} 篇相关论文")
             return papers
