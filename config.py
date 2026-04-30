@@ -9,12 +9,21 @@ class Config:
     EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
     RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL")
     
-    # 从环境变量读取天数，默认为 1
-    FETCH_DAYS = int(os.getenv("FETCH_DAYS", 1))
-    
     # Arxiv配置
-    SEARCH_KEYWORDS = os.getenv("SEARCH_KEYWORDS", "Rydberg atom").split(",")
-    MAX_RESULTS = int(os.getenv("MAX_RESULTS", 20))
+    # 优先从环境变量读取关键词，并进行健壮性处理（去除多余空格和引号）
+    _env_keywords = os.getenv("SEARCH_KEYWORDS")
+    if _env_keywords:
+        SEARCH_KEYWORDS = [kw.strip().strip('"').strip("'") for kw in _env_keywords.split(",")]
+    else:
+        # 默认搜索关键词
+        SEARCH_KEYWORDS = [
+            "Rydberg atom",
+            "magneto-optical trap",
+            "optical tweezers",
+            "nanophotonics"
+        ]
+        
+    MAX_RESULTS = int(os.getenv("MAX_RESULTS", 50))
     
     # 定时任务配置
     SCHEDULE_TIME = "09:00"  # 每天9点
@@ -27,5 +36,5 @@ class Config:
     def validate(cls):
         """验证配置"""
         if not cls.EMAIL_SENDER or not cls.EMAIL_PASSWORD:
-            raise ValueError("邮箱配置不完整，请检查.env文件")
+            raise ValueError("邮箱配置不完整，请检查 .env 文件或 GitHub Secrets")
         return True
