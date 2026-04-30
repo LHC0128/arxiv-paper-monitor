@@ -93,6 +93,8 @@ class ArxivFetcher:
             f"👥 作者: {', '.join(paper['authors'][:3])}{' 等' if len(paper['authors']) > 3 else ''}",
             f"📅 发布时间: {paper['published']}",
             f"📚 分类: {paper['primary_category']}",
+            # === 新增这一行 ===
+            f"🏷️ 命中关键词: {', '.join(paper.get('matched_keywords', ['未知']))}", 
             "",
             "📝 摘要:",
             self._truncate_text(abstract, 800) + ("..." if len(abstract) > 800 else ""),
