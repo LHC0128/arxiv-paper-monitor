@@ -11,26 +11,24 @@ class ArxivFetcher:
         self.client = arxiv.Client()
         self.keywords = Config.SEARCH_KEYWORDS
         
-    def fetch_recent_papers(self, max_results: int = 50) -> List[Dict]:
-        """
-        获取最近提交的符合关键词的论文
-        
-        Args:
-            max_results: 一次最多获取的论文数量。
-                         如果 config.py 中有 Config.MAX_RESULTS，可以替换这里的 50。
-        """
+    def fetch_recent_papers(self, days_back: int = 1, max_results: int = 50) -> List[Dict]:
+        """获取符合关键词的论文"""
         try:
-            # 1. 构建关键词查询 (全局搜索: 标题、摘要、作者)
-            # 例如: all:"Rydberg atom" OR all:"optical tweezers"
-            keyword_query = " OR ".join([f'all:"{kw.strip()}"' for kw in self.keywords])
+            from datetime import timedelta # 确保导入了 timedelta
             
-            # 使用括号包裹，确保逻辑清晰
+            # 1. 基础关键词查询
+            keyword_query = " OR ".join([f'all:"{kw.strip()}"' for kw in self.keywords])
             query = f"({keyword_query})"
+            
+            # === 新增：动态时间限制逻辑 ===
+            if days_back > 0:
+                end_date = datetime.now()
+                start_date = end_date - timedelta(days=days_back)
+                date_range = f"[{start_date.strftime('%Y%m%d')} TO {end_date.strftime('%Y%m%d')}]"
+                query += f" AND submittedDate:{date_range}"
             
             logger.info(f"搜索查询: {query}")
             
-            # 2. 搜索论文，按提交时间降序排列 (获取最新的)
-            # 使用 getattr 尝试从 Config 获取最大数量，如果没有则使用默认值
             fetch_limit = getattr(Config, 'MAX_RESULTS', max_results)
             
             search = arxiv.Search(
@@ -39,6 +37,8 @@ class ArxivFetcher:
                 sort_by=arxiv.SortCriterion.SubmittedDate,
                 sort_order=arxiv.SortOrder.Descending
             )
+            
+            # ... 下面的解析和返回逻辑保持不变 ...
             
             papers = []
             for result in self.client.results(search):
