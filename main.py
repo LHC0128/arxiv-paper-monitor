@@ -30,8 +30,7 @@ class ArxivDailyDigest:
         
         try:
             # 1. 获取论文
-            days_back = 0 if test_mode else Config.FETCH_DAYS
-            papers = self.fetcher.fetch_recent_papers(days_back=days_back)
+            papers = self.fetcher.fetch_recent_papers()
             
             # 2. 生成摘要
             summaries = []
