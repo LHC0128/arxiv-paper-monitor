@@ -19,7 +19,7 @@ class Config:
         SEARCH_KEYWORDS = [kw.strip().strip('"').strip("'") for kw in _env_keywords.split(",")]
     else:
         SEARCH_KEYWORDS = [
-            'Magnetometer','Control'
+            "Magnetometer","Control"
         ]
         
     MAX_RESULTS = int(os.getenv("MAX_RESULTS", 50))
